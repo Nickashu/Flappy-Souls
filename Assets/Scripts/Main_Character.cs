@@ -1,14 +1,15 @@
-using System.Collections;
 using UnityEngine;
 
 public class Main_Character : MonoBehaviour{
 
     private GameObject personagem;
     private Animator anim;
-    private Vector3 direcao;
     private Rigidbody2D rig;
+    private int contToques = 0;
 
-    public float forcaPulo, gravidade;
+    public GameObject canvas;
+    public float forcaPulo, gravidade, velocidade;
+    public static bool morreu = false;
 
     void Awake(){
         personagem = GetComponent<GameObject>();
@@ -16,32 +17,42 @@ public class Main_Character : MonoBehaviour{
         rig = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
     void Update(){
-        if(Input.GetKey(KeyCode.Mouse0) || Input.GetKey(KeyCode.Space)){
-            rig.gravityScale = 0;
-            rig.AddForce(new Vector2(0, forcaPulo), ForceMode2D.Impulse);    /*Adicionando fora ao rigidbody para fazer o personagem pular*/
-            anim.SetBool("isPulando", true);
-            anim.SetBool("isCaindo", false);
-        }
-        if ((Input.GetKeyUp(KeyCode.Mouse0) && !Input.GetKey(KeyCode.Space)) || (Input.GetKeyUp(KeyCode.Space) && !Input.GetKey(KeyCode.Mouse0))) {
-            rig.gravityScale = gravidade;
-            anim.SetBool("isPulando", false);
-            anim.SetBool("isCaindo", true);
+        if (!morreu) {
+            if (Input.GetKey(KeyCode.Mouse0) || Input.GetKey(KeyCode.Space)) {
+                if (contToques == 0) {    /*Na primeira vez que a pessoa der o input*/
+                    canvas.SetActive(false);
+                    contToques++;
+                }
+                rig.gravityScale = 0;
+                rig.AddForce(new Vector2(0, forcaPulo), ForceMode2D.Impulse);    /*Adicionando fora ao rigidbody para fazer o personagem pular*/
+                anim.SetBool("isPulando", true);
+                anim.SetBool("isCaindo", false);
+            }
+            if ((Input.GetKeyUp(KeyCode.Mouse0) && !Input.GetKey(KeyCode.Space)) || (Input.GetKeyUp(KeyCode.Space) && !Input.GetKey(KeyCode.Mouse0))) {
+                rig.gravityScale = gravidade;
+                anim.SetBool("isPulando", false);
+                anim.SetBool("isCaindo", true);
+            }
+
+            if (contToques > 0) {
+                transform.Translate(Vector3.right * velocidade * Time.deltaTime);
+            }
         }
     }
-    /*
-    private IEnumerator pulo() {
-        rig.gravityScale = 0;
-        rig.mass = 0.5f;
-        rig.AddForce(new Vector2(0, forcaPulo), ForceMode2D.Impulse);
-        anim.SetBool("isPulando", true);
-        anim.SetBool("isCaindo", false);
-        yield return new WaitForSeconds(0.5f);
-        rig.gravityScale = 1;
-        rig.mass = 10;
-        anim.SetBool("isPulando", false);
-        anim.SetBool("isCaindo", true);
+
+    private void OnTriggerExit2D(Collider2D colisor) {
+        if(colisor.tag == "obstaculo") {     /*Verificando se o personagem conseguiu passar por um obstáculo*/
+            Debug.Log("Passou obstaculo!");
+        }
     }
-*/
+
+    private void OnCollisionEnter2D(Collision2D colisor) {
+        if(colisor.gameObject.tag == "cano" || colisor.gameObject.tag == "ground") {     /*Verificando a morte do personagem*/
+            if(contToques > 0) {
+                Debug.Log("Morreu!");
+                morreu = true;
+            }
+        }
+    }
 }

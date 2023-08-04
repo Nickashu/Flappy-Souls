@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - cano
+  - obstaculo
+  - ground
+  - player
   layers:
   - Default
   - TransparentFX
