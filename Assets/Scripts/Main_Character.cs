@@ -9,7 +9,7 @@ public class Main_Character : MonoBehaviour{
 
     public GameObject canvas;
     public float forcaPulo, gravidade, velocidade;
-    public static bool morreu = false;
+    public static bool morreu = false, comecouJogo=false;
 
     void Awake(){
         personagem = GetComponent<GameObject>();
@@ -22,6 +22,7 @@ public class Main_Character : MonoBehaviour{
             if (Input.GetKey(KeyCode.Mouse0) || Input.GetKey(KeyCode.Space)) {
                 if (contToques == 0) {    /*Na primeira vez que a pessoa der o input*/
                     canvas.SetActive(false);
+                    comecouJogo = true;
                     contToques++;
                 }
                 rig.gravityScale = 0;
@@ -51,6 +52,7 @@ public class Main_Character : MonoBehaviour{
         if(colisor.gameObject.tag == "cano" || colisor.gameObject.tag == "ground") {     /*Verificando a morte do personagem*/
             if(contToques > 0) {
                 Debug.Log("Morreu!");
+                comecouJogo = false;
                 morreu = true;
             }
         }

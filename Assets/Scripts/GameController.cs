@@ -7,20 +7,21 @@ public class GameController : MonoBehaviour {
     public static float distanciaSpawn, distanciaDestroy;
 
     private float limiteSuperiorObstaculo = 2.08f, limiteInferiorObstaculo = -4.2f;
-
-    private void Start() {
-        distanciaDestroy = cam.GetComponent<Transform>().position.x - 17;
-        distanciaSpawn = cam.GetComponent<Transform>().position.x + 13;
-    }
+    private int cont = 0;
 
     void Update() {
-        if (!Main_Character.morreu) {
+        distanciaDestroy = cam.GetComponent<Transform>().position.x - 17;
+        distanciaSpawn = cam.GetComponent<Transform>().position.x + 13;
+        if (!Main_Character.morreu && Main_Character.comecouJogo) {
+            if (cont <= 2)
+                cont++;
             StartCoroutine(spawnarObstaculo());
         }
     }
 
     private IEnumerator spawnarObstaculo() {
-        yield return new WaitForSeconds(4);
+        if(cont > 1)     /*Verificando se é a primeira vez que estou chamando*/
+            yield return new WaitForSeconds(4);
         GameObject objetoCopia = obstaculo;
         Vector3 posicao = new Vector3(distanciaSpawn, Random.Range(limiteInferiorObstaculo, limiteSuperiorObstaculo), obstaculo.transform.position.z);
         objetoCopia.transform.position = posicao;
