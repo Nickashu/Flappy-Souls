@@ -1,19 +1,33 @@
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour {
 
-    public GameObject cam, obstaculo;
+    public GameObject cam, obstaculo, objetoPersonagens;
     public Transform ground, background;
     public static float distanciaSpawn, distanciaDestroy;
 
     private float limiteSuperiorObstaculo = 2.08f, limiteInferiorObstaculo = -4.2f, tempoTransicaoTelas=0.3f, posicaoInicialCamera, intervaloReposicaoCenario=20.04f;
+    private float posicaoTrocaPersonagemDireita = -6.6f, posicaoTrocaPersonagemEsquerda = 5.5f, posicaoCentral=-1.4f;
     private int cont = 0;
+    private int indexPersonagemAtivo = 0, indexNovoPersonagem = 0;
+    private bool isTrocandoPersonagensDireita = false, isTrocandoPersonagensEsquerda = false;
 
     private void Start() {
-        if (SceneManager.GetActiveScene().name.Contains("main"))    /*Se estiver na cena do jogo*/
+        if (SceneManager.GetActiveScene().name.Contains("main")) {       /*Se estiver na cena do jogo*/
             posicaoInicialCamera = cam.transform.position.x;
+            Transform[] filhos = objetoPersonagens.GetComponentsInChildren<Transform>(true);
+            for(int i=0; i<filhos.Length; i++) {
+                if (i == Configs.indexpersonagemSelecionado) {
+                    filhos[i].gameObject.SetActive(true);
+                    Cam.player = filhos[i].gameObject.transform;
+                    break;
+                }
+            }
+        }
     }
 
     void Update() {
@@ -32,6 +46,35 @@ public class GameController : MonoBehaviour {
                 ground.transform.position = novaPosicao;
                 background.transform.position = novaPosicao;
                 posicaoInicialCamera = cam.transform.position.x;
+            }
+        }
+        else if (SceneManager.GetActiveScene().name.Contains("characters")) {    /*Se estiver na cena de troca de personagem*/
+            if(isTrocandoPersonagensDireita || isTrocandoPersonagensEsquerda) {
+                Transform[] filhos = objetoPersonagens.GetComponentsInChildren<Transform>(true);
+                if (isTrocandoPersonagensDireita) {
+                    filhos[indexPersonagemAtivo].gameObject.transform.Translate(Vector3.right * 3 * Time.deltaTime);
+                    filhos[indexNovoPersonagem].gameObject.transform.Translate(Vector3.right * 3 * Time.deltaTime);
+
+                    if (filhos[indexNovoPersonagem].gameObject.transform.position.x >= posicaoCentral + 1.3f) {    /*Quando o novo personagem chegar no centro da tela*/
+                        filhos[indexNovoPersonagem].gameObject.GetComponent<Animator>().SetBool("isCorrendo", false);
+                        filhos[indexPersonagemAtivo].gameObject.SetActive(false);
+                        isTrocandoPersonagensEsquerda = false;
+                        isTrocandoPersonagensDireita = false;
+                        Configs.indexpersonagemSelecionado = indexNovoPersonagem;     /*Definindo o novo personagem no arquivo de configurações globais*/
+                    }
+                }
+                else if (isTrocandoPersonagensEsquerda) {
+                    filhos[indexPersonagemAtivo].gameObject.transform.Translate(Vector3.left * 3 * Time.deltaTime);
+                    filhos[indexNovoPersonagem].gameObject.transform.Translate(Vector3.left * 3 * Time.deltaTime);
+
+                    if (filhos[indexNovoPersonagem].gameObject.transform.position.x <= posicaoCentral + 1.3f) {    /*Quando o novo personagem chegar no centro da tela*/
+                        filhos[indexNovoPersonagem].gameObject.GetComponent<Animator>().SetBool("isCorrendo", false);
+                        filhos[indexPersonagemAtivo].gameObject.SetActive(false);
+                        isTrocandoPersonagensEsquerda = false;
+                        isTrocandoPersonagensDireita = false;
+                        Configs.indexpersonagemSelecionado = indexNovoPersonagem;
+                    }
+                }
             }
         }
     }
@@ -73,13 +116,66 @@ public class GameController : MonoBehaviour {
     }
 
     public void telaMenu() {
-        tocarSomBotão();
-        StartCoroutine(carregarTelaMenu());
+        if (!isTrocandoPersonagensDireita && !isTrocandoPersonagensEsquerda) {
+            tocarSomBotão();
+            StartCoroutine(carregarTelaMenu());
+        }
     }
     public IEnumerator carregarTelaMenu() {
         yield return new WaitForSeconds(tempoTransicaoTelas);
         Transicao_Fases.tela = 1;
         Transicao_Fases.transicao = true;
+    }
+
+    public void trocarPersonagemDireita() {    /*Esta função será chamada na tela de troca de personagens*/
+        if (!isTrocandoPersonagensDireita && !isTrocandoPersonagensEsquerda) {
+            Transform[] filhos = objetoPersonagens.GetComponentsInChildren<Transform>(true);
+            for (int i = 1; i < filhos.Length; i++) {
+                if (filhos[i].gameObject.GetComponent<SpriteRenderer>().flipX == true)
+                    filhos[i].gameObject.GetComponent<SpriteRenderer>().flipX = false;      /*Girando o personagem se ele estiver olhando para a esquerda*/
+
+                if (filhos[i].gameObject.activeSelf) {    /*Se o personagem estiver ativo*/
+                    indexPersonagemAtivo = i;
+                    if (i < filhos.Length - 1)
+                        indexNovoPersonagem = i + 1;
+                    else
+                        indexNovoPersonagem = 1;
+                }
+                else {
+                    Vector3 novaPosicao = new Vector3(posicaoTrocaPersonagemDireita, filhos[i].position.y, filhos[i].position.z);
+                    filhos[i].gameObject.transform.position = novaPosicao;
+                }
+            }
+            filhos[indexNovoPersonagem].gameObject.SetActive(true);
+            filhos[indexPersonagemAtivo].gameObject.GetComponent<Animator>().SetBool("isCorrendo", true);
+            filhos[indexNovoPersonagem].gameObject.GetComponent<Animator>().SetBool("isCorrendo", true);
+            isTrocandoPersonagensDireita = true;
+        }
+    }
+    public void trocarPersonagemEsquerda() {    /*Esta função será chamada na tela de troca de personagens*/
+        if (!isTrocandoPersonagensDireita && !isTrocandoPersonagensEsquerda) {
+            Transform[] filhos = objetoPersonagens.GetComponentsInChildren<Transform>(true);
+            for (int i = filhos.Length - 1; i >= 1; i--) {
+                if (filhos[i].gameObject.GetComponent<SpriteRenderer>().flipX == false)
+                    filhos[i].gameObject.GetComponent<SpriteRenderer>().flipX = true;      /*Girando o personagem se ele estiver olhando para a direita*/
+
+                if (filhos[i].gameObject.activeSelf) {    /*Se o personagem estiver ativo*/
+                    indexPersonagemAtivo = i;
+                    if (i > 1)
+                        indexNovoPersonagem = i - 1;
+                    else
+                        indexNovoPersonagem = filhos.Length - 1;
+                }
+                else {
+                    Vector3 novaPosicao = new Vector3(posicaoTrocaPersonagemEsquerda, filhos[i].position.y, filhos[i].position.z);
+                    filhos[i].gameObject.transform.position = novaPosicao;
+                }
+            }
+            filhos[indexNovoPersonagem].gameObject.SetActive(true);
+            filhos[indexPersonagemAtivo].gameObject.GetComponent<Animator>().SetBool("isCorrendo", true);
+            filhos[indexNovoPersonagem].gameObject.GetComponent<Animator>().SetBool("isCorrendo", true);
+            isTrocandoPersonagensEsquerda = true;
+        }
     }
 
     private void tocarSomBotão() {
