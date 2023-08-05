@@ -5,9 +5,9 @@ public class Main_Character : MonoBehaviour{
     private GameObject personagem;
     private Animator anim;
     private Rigidbody2D rig;
-    private int contToques = 0;
+    private int contToques = 0, score=0;
 
-    public GameObject canvas;
+    public GameObject canvas, objetoBotoes, telaMorte;
     public float forcaPulo, gravidade, velocidade;
     public static bool morreu = false, comecouJogo=false;
 
@@ -19,25 +19,41 @@ public class Main_Character : MonoBehaviour{
 
     void Update(){
         if (!morreu) {
-            if (Input.GetKey(KeyCode.Mouse0) || Input.GetKey(KeyCode.Space)) {
-                if (contToques == 0) {    /*Na primeira vez que a pessoa der o input*/
+            if(Input.GetKeyDown(KeyCode.Space)) {     /*Primeiro pulo com espaço*/
+                if (contToques == 0) {    /*No começo do jogo (primeira vez que a pessoa der o input)*/
                     canvas.SetActive(false);
                     comecouJogo = true;
                     contToques++;
                 }
-                rig.gravityScale = 0;
-                rig.AddForce(new Vector2(0, forcaPulo), ForceMode2D.Impulse);    /*Adicionando fora ao rigidbody para fazer o personagem pular*/
-                anim.SetBool("isPulando", true);
-                anim.SetBool("isCaindo", false);
             }
-            if ((Input.GetKeyUp(KeyCode.Mouse0) && !Input.GetKey(KeyCode.Space)) || (Input.GetKeyUp(KeyCode.Space) && !Input.GetKey(KeyCode.Mouse0))) {
-                rig.gravityScale = gravidade;
-                anim.SetBool("isPulando", false);
-                anim.SetBool("isCaindo", true);
+            if (Input.GetKeyDown(KeyCode.Mouse0)) {     /*Primeiro pulo com o mouse*/
+                if (contToques == 0) {    /*No começo do jogo (primeira vez que a pessoa der o input)*/
+                    Vector3 mousePosition = Input.mousePosition;
+                    Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
+                    Vector2 worldPosition2D = new Vector2(worldPosition.x, worldPosition.y);
+                    if (!objetoBotoes.GetComponent<Collider2D>().OverlapPoint(worldPosition2D)) {    /*Verifica se o clique ocorreu sobre o objeto que bloqueia o clique nos botões*/
+                        Debug.Log("Não clicou no objeto!");
+                        canvas.SetActive(false);
+                        comecouJogo = true;
+                        contToques++;
+                    }
+                }
             }
 
-            if (contToques > 0) {
-                transform.Translate(Vector3.right * velocidade * Time.deltaTime);
+            if (contToques > 0) {    /*Depois do pulo inicial*/
+                if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.Mouse0)) {
+                    rig.gravityScale = 0;
+                    rig.AddForce(new Vector2(0, forcaPulo), ForceMode2D.Impulse);    /*Adicionando fora ao rigidbody para fazer o personagem pular*/
+                    anim.SetBool("isPulando", true);
+                    anim.SetBool("isCaindo", false);
+                }
+                if ((Input.GetKeyUp(KeyCode.Mouse0) && !Input.GetKey(KeyCode.Space)) || (Input.GetKeyUp(KeyCode.Space) && !Input.GetKey(KeyCode.Mouse0))) {
+                    rig.gravityScale = gravidade;
+                    anim.SetBool("isPulando", false);
+                    anim.SetBool("isCaindo", true);
+                }
+
+                transform.Translate(Vector3.right * velocidade * Time.deltaTime);   /*Para mover o personagem para a direita*/
             }
         }
     }
@@ -45,6 +61,7 @@ public class Main_Character : MonoBehaviour{
     private void OnTriggerExit2D(Collider2D colisor) {
         if(colisor.tag == "obstaculo") {     /*Verificando se o personagem conseguiu passar por um obstáculo*/
             Debug.Log("Passou obstaculo!");
+            score++;
         }
     }
 
@@ -52,9 +69,19 @@ public class Main_Character : MonoBehaviour{
         if(colisor.gameObject.tag == "cano" || colisor.gameObject.tag == "ground") {     /*Verificando a morte do personagem*/
             if(contToques > 0) {
                 Debug.Log("Morreu!");
+                anim.SetBool("morreu", true);
+                telaMorte.SetActive(true);
                 comecouJogo = false;
                 morreu = true;
             }
         }
+    }
+
+    private void restart() {
+        telaMorte.SetActive(false);
+        comecouJogo = false;
+        contToques = 0;
+        morreu = false;
+        score = 0;
     }
 }

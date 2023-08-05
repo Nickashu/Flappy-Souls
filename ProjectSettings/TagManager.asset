@@ -8,6 +8,10 @@ TagManager:
   - obstaculo
   - ground
   - player
+  - frog
+  - pinkGuy
+  - virtualGuy
+  - maskDude
   layers:
   - Default
   - TransparentFX
