@@ -8,10 +8,10 @@ TagManager:
   - obstaculo
   - ground
   - player
-  - frog
-  - pinkGuy
-  - virtualGuy
-  - maskDude
+  - txtNovoRecorde
+  - numMoedas
+  - score
+  - moeda
   layers:
   - Default
   - TransparentFX

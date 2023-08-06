@@ -1,20 +1,22 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class Main_Character : MonoBehaviour{
 
-    private GameObject personagem;
     private Animator anim;
     private Rigidbody2D rig;
-    private int contToques = 0, score=0;
+    private int contToques = 0, score=0, moedas=0;
 
-    public GameObject canvas, objetoBotoes, telaMorte;
+    public GameObject canvas, objetoBotoes, telaMorte, menuMorte;
     public float forcaPulo, gravidade, velocidade;
     public static bool morreu = false, comecouJogo=false;
 
     void Awake(){
-        personagem = GetComponent<GameObject>();
         anim = GetComponent<Animator>();
         rig = GetComponent<Rigidbody2D>();
+        morreu = false;
+        comecouJogo = false;
     }
 
     void Update(){
@@ -62,6 +64,15 @@ public class Main_Character : MonoBehaviour{
         if(colisor.tag == "obstaculo") {     /*Verificando se o personagem conseguiu passar por um obstáculo*/
             Debug.Log("Passou obstaculo!");
             score++;
+            moedas++;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D colisor) {
+        if (colisor.tag == "moeda") {      /*Verificando se o jogador pegou uma moeda extra*/
+            Debug.Log("Pegou moeda!");
+            moedas ++;
+            Destroy(colisor.gameObject);
         }
     }
 
@@ -69,19 +80,33 @@ public class Main_Character : MonoBehaviour{
         if(colisor.gameObject.tag == "cano" || colisor.gameObject.tag == "ground") {     /*Verificando a morte do personagem*/
             if(contToques > 0) {
                 Debug.Log("Morreu!");
+                StartCoroutine(aparecerMenuMorte());
                 anim.SetBool("morreu", true);
                 telaMorte.SetActive(true);
                 comecouJogo = false;
                 morreu = true;
+                Configs.numMoedas += moedas;
             }
         }
     }
 
-    private void restart() {
-        telaMorte.SetActive(false);
-        comecouJogo = false;
-        contToques = 0;
-        morreu = false;
-        score = 0;
+    private IEnumerator aparecerMenuMorte() {
+        Transform[] filhosMenuMorte = menuMorte.GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < filhosMenuMorte.Length; i++) {
+            if (filhosMenuMorte[i].gameObject.tag == "score") {
+                filhosMenuMorte[i].gameObject.GetComponent<TextMeshProUGUI>().text = score.ToString();
+            }
+            if (filhosMenuMorte[i].gameObject.tag == "numMoedas") {
+                filhosMenuMorte[i].gameObject.GetComponent<TextMeshProUGUI>().text = "+" + moedas.ToString();
+            }
+            if (filhosMenuMorte[i].gameObject.tag == "txtNovoRecorde") {
+                if (score > Configs.highScore) {
+                    filhosMenuMorte[i].gameObject.SetActive(true);
+                    Configs.highScore = score;
+                }
+            }
+        }
+        yield return new WaitForSeconds(1.5f);
+        menuMorte.SetActive(true);
     }
 }

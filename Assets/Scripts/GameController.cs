@@ -1,29 +1,39 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour {
 
-    public GameObject cam, obstaculo, objetoPersonagens;
+    public GameObject cam, obstaculo, moeda, objetoPersonagens, txtNumMoedasMenu;
     public Transform ground, background;
     public static float distanciaSpawn, distanciaDestroy;
 
-    private float limiteSuperiorObstaculo = 2.08f, limiteInferiorObstaculo = -4.2f, tempoTransicaoTelas=0.3f, posicaoInicialCamera, intervaloReposicaoCenario=20.04f;
+    private float limiteSuperiorObstaculo = 2.08f, limiteInferiorObstaculo = -4.2f, limiteSuperiorMoeda=6, limiteInferiorMoeda=-4, tempoTransicaoTelas=0.2f, posicaoInicialCamera, intervaloReposicaoCenario=20.04f;
     private float posicaoTrocaPersonagemDireita = -6.6f, posicaoTrocaPersonagemEsquerda = 5.5f, posicaoCentral=-1.4f;
-    private int cont = 0;
+    private int cont = 0, contObstaculos=0;
     private int indexPersonagemAtivo = 0, indexNovoPersonagem = 0;
     private bool isTrocandoPersonagensDireita = false, isTrocandoPersonagensEsquerda = false;
 
     private void Start() {
+        Transform[] filhos = objetoPersonagens.GetComponentsInChildren<Transform>(true);
         if (SceneManager.GetActiveScene().name.Contains("main")) {       /*Se estiver na cena do jogo*/
             posicaoInicialCamera = cam.transform.position.x;
-            Transform[] filhos = objetoPersonagens.GetComponentsInChildren<Transform>(true);
             for(int i=0; i<filhos.Length; i++) {
                 if (i == Configs.indexpersonagemSelecionado) {
                     filhos[i].gameObject.SetActive(true);
                     Cam.player = filhos[i].gameObject.transform;
+                    break;
+                }
+            }
+            txtNumMoedasMenu.GetComponent<TextMeshProUGUI>().text = Configs.numMoedas.ToString();     /*Mostrando o número de moedas totais*/
+        }
+        if (SceneManager.GetActiveScene().name.Contains("characters")) {
+            for (int i = 0; i < filhos.Length; i++) {
+                if (i == Configs.indexpersonagemSelecionado) {
+                    filhos[i].gameObject.SetActive(true);
+                    Vector3 novaPosicao = new Vector3(posicaoCentral+1.5f, filhos[i].gameObject.transform.position.y, filhos[i].gameObject.transform.position.z);
+                    filhos[i].transform.position = novaPosicao;    /*Posicionando o personagem selecionado no centro da tela*/
                     break;
                 }
             }
@@ -82,11 +92,18 @@ public class GameController : MonoBehaviour {
     private IEnumerator spawnarObstaculo() {
         if(cont > 1)     /*Verificando se é a primeira vez que estou chamando*/
             yield return new WaitForSeconds(4);
-        GameObject objetoCopia = obstaculo;
+        GameObject objetoCopia = Instantiate(obstaculo);
         Vector3 posicao = new Vector3(distanciaSpawn, Random.Range(limiteInferiorObstaculo, limiteSuperiorObstaculo), obstaculo.transform.position.z);
         objetoCopia.transform.position = posicao;
         objetoCopia.SetActive(true);
-        Instantiate(objetoCopia);
+        contObstaculos++;
+        if(contObstaculos == 2) {     /*A cada 3 obstáculos, será spawnada uma moeda*/
+            GameObject moedaCopia = Instantiate(moeda);
+            Vector3 posicaoMoeda = new Vector3(objetoCopia.transform.position.x + 10, Random.Range(limiteInferiorMoeda, limiteSuperiorMoeda), moeda.transform.position.z);
+            moedaCopia.transform.position = posicaoMoeda;
+            moedaCopia.SetActive(true);
+            contObstaculos = 0;
+        }
         StopAllCoroutines();    //Para impedir que sejam spawnados vários objetos
     }
 
