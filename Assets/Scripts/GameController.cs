@@ -38,6 +38,14 @@ public class GameController : MonoBehaviour {
                 }
             }
         }
+        if (SceneManager.GetActiveScene().name.Contains("settings")) {
+            for (int i = 0; i < filhos.Length; i++) {
+                if (i == Configs.indexpersonagemSelecionado) {
+                    filhos[i].gameObject.SetActive(true);
+                    break;
+                }
+            }
+        }
     }
 
     void Update() {

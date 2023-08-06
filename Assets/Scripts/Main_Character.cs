@@ -80,6 +80,7 @@ public class Main_Character : MonoBehaviour{
         if(colisor.gameObject.tag == "cano" || colisor.gameObject.tag == "ground") {     /*Verificando a morte do personagem*/
             if(contToques > 0) {
                 Debug.Log("Morreu!");
+                gameObject.GetComponent<Rigidbody2D>().gravityScale = 5;
                 StartCoroutine(aparecerMenuMorte());
                 anim.SetBool("morreu", true);
                 telaMorte.SetActive(true);
