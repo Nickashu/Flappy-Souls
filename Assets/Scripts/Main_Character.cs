@@ -7,6 +7,7 @@ public class Main_Character : MonoBehaviour{
     private Animator anim;
     private Rigidbody2D rig;
     private int contToques = 0, score=0, moedas=0, pontosMoeda=1, highScore=0;
+    private bool ultrapassouRecorde = false;
 
     public GameObject canvas, objetoBotoes, telaMorte, menuMorte, txtScore;
     public float forcaPulo, gravidade, velocidade;
@@ -37,6 +38,11 @@ public class Main_Character : MonoBehaviour{
 
     void Update(){
         if (!morreu) {
+            if (!comecouJogo) {
+                if (Input.GetKeyDown(KeyCode.Alpha9))
+                    Configs.ResetData();   /*Apagando todos os dados salvos*/
+            }
+
             if(Input.GetKeyDown(KeyCode.Space)) {     /*Primeiro pulo com espaço*/
                 if (contToques == 0) {    /*No começo do jogo (primeira vez que a pessoa der o input)*/
                     canvas.SetActive(false);
@@ -80,7 +86,6 @@ public class Main_Character : MonoBehaviour{
 
     private void OnTriggerExit2D(Collider2D colisor) {
         if(colisor.tag == "obstaculo" && !morreu) {     /*Verificando se o personagem conseguiu passar por um obstáculo*/
-            Debug.Log("Passou obstaculo!");
             score++;
             moedas++;
             gameObject.transform.GetChild(0).gameObject.SetActive(true);     /*Ativando o canvas do personagem e fazendo aparecer o indicador de pontuação*/
@@ -95,7 +100,6 @@ public class Main_Character : MonoBehaviour{
 
     private void OnTriggerEnter2D(Collider2D colisor) {
         if (colisor.tag == "moeda") {      /*Verificando se o jogador pegou uma moeda extra*/
-            Debug.Log("Pegou moeda!");
             moedas += pontosMoeda;
             Destroy(colisor.gameObject);
         }
@@ -104,31 +108,32 @@ public class Main_Character : MonoBehaviour{
     private void OnCollisionEnter2D(Collision2D colisor) {
         if((colisor.gameObject.tag == "cano" || colisor.gameObject.tag == "ground") && !morreu) {     /*Verificando a morte do personagem*/
             if(contToques > 0) {
-                Debug.Log("Morreu!");
                 gameObject.GetComponent<Rigidbody2D>().gravityScale = 5;
+                if (score > highScore) {
+                    ultrapassouRecorde = true;
+                    if (Configs.dificuldade == 0)
+                        Configs.highScoreFacil = score;
+                    else if (Configs.dificuldade == 1)
+                        Configs.highScorePadrao = score;
+                    else
+                        Configs.highScoreHardcore = score;
+                }
+                Configs.numMoedas += moedas;
+
                 StartCoroutine(aparecerMenuMorte());
                 anim.SetBool("morreu", true);
                 telaMorte.SetActive(true);
                 comecouJogo = false;
                 morreu = true;
-                Configs.numMoedas += moedas;
+
+                Debug.Log("Salvando os dados no arquivo!");
+                Configs.SaveData();
             }
         }
     }
 
     private IEnumerator aparecerMenuMorte() {
         Transform[] filhosMenuMorte = menuMorte.GetComponentsInChildren<Transform>(true);
-        bool ultrapassouRecorde = false;
-        if (score > highScore) {
-            ultrapassouRecorde = true;
-            if (Configs.dificuldade == 0)
-                Configs.highScoreFacil = score;
-            else if (Configs.dificuldade == 1)
-                Configs.highScorePadrao = score;
-            else
-                Configs.highScoreHardcore = score;
-        }
-
         for (int i = 0; i < filhosMenuMorte.Length; i++) {
             if (filhosMenuMorte[i].gameObject.tag == "score") {
                 filhosMenuMorte[i].gameObject.GetComponent<TextMeshProUGUI>().text = score.ToString();

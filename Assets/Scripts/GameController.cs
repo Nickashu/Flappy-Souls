@@ -21,6 +21,10 @@ public class GameController : MonoBehaviour {
         numPersonagens = objetoPersonagens.transform.childCount;
 
         if (SceneManager.GetActiveScene().name.Contains("main")) {       /*Se estiver na cena do jogo*/
+            if(Configs.primeiraTela == true) {    /*Se for o load inicial do jogo*/
+                LoadInicial();
+            }
+
             posicaoInicialCamera = cam.transform.position.x;
             for(int i = 0; i< numPersonagens; i++) {
                 if (i == Configs.indexPersonagemSelecionado) {
@@ -113,6 +117,8 @@ public class GameController : MonoBehaviour {
                         atualizarNomePersonagem(indexNovoPersonagem);   /*Atualizando o nome do personagem*/
                         if (Configs.isCompradoPersonagens[Configs.personagens[indexNovoPersonagem]] == true) {     /*Verificando se o personagem foi comprado*/
                             Configs.indexPersonagemSelecionado = indexNovoPersonagem;     /*Definindo o novo personagem no arquivo de configurações globais*/
+                            Debug.Log("Salvando os dados no arquivo!");
+                            Configs.SaveData();
                         }
                     }
                 }
@@ -128,6 +134,8 @@ public class GameController : MonoBehaviour {
                         atualizarNomePersonagem(indexNovoPersonagem);   /*Atualizando o nome do personagem*/
                         if (Configs.isCompradoPersonagens[Configs.personagens[indexNovoPersonagem]] == true) {     /*Verificando se o personagem foi comprado*/
                             Configs.indexPersonagemSelecionado = indexNovoPersonagem;     /*Definindo o novo personagem no arquivo de configurações globais*/
+                            Debug.Log("Salvando os dados no arquivo!");
+                            Configs.SaveData();
                         }
                     }
                 }
@@ -217,8 +225,14 @@ public class GameController : MonoBehaviour {
             objetoPersonagens.transform.GetChild(indexPersonagemComprado).transform.GetChild(0).gameObject.SetActive(false);    /*Escondendo o preço*/
             Debug.Log("Compra efetuada!");
 
+            /*Definindo o novo personagem no arquivo de configurações globais*/
             Configs.numMoedas -= Configs.precosPersonagens[Configs.personagens[indexPersonagemComprado]];
+            Configs.isCompradoPersonagens[Configs.personagens[indexPersonagemComprado]] = true;
+            Configs.indexPersonagemSelecionado = indexPersonagemComprado;
             atualizarNumMoedas();
+            Debug.Log("Salvando os dados no arquivo!");
+            Configs.SaveData();
+
             isComprandoPersonagem = true;
             StartCoroutine(comprarPersonagem(indexPersonagemComprado));
         }
@@ -229,10 +243,8 @@ public class GameController : MonoBehaviour {
     }
 
     public IEnumerator comprarPersonagem(int indexPersonagem) {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
         objetoPersonagens.transform.GetChild(indexPersonagem).GetComponent<SpriteRenderer>().color = Color.white;
-        Configs.isCompradoPersonagens[Configs.personagens[indexPersonagem]] = true;
-        Configs.indexPersonagemSelecionado = indexPersonagem;       /*Definindo o novo personagem no arquivo de configurações globais*/
         isComprandoPersonagem = false;
         StopAllCoroutines();
     }
@@ -253,7 +265,6 @@ public class GameController : MonoBehaviour {
 
     public void telaPersonagens() {
         tocarSomBotão();
-        Debug.Log("apertou!");
         StartCoroutine(carregarTelaPersonagens());
     }
     public IEnumerator carregarTelaPersonagens() {
@@ -276,10 +287,9 @@ public class GameController : MonoBehaviour {
 
     public void trocarDificuldade(int valor) {
         Configs.dificuldade = valor;    /*Alterando a dificuldade do jogo*/
+        Debug.Log("Salvando os dados no arquivo!");
+        Configs.SaveData();
     }
-
-
-
 
     /*Funções auxiliares*/
     private void atualizarNumMoedas() {
@@ -293,8 +303,24 @@ public class GameController : MonoBehaviour {
             txtNomePersonagem.GetComponent<TextMeshProUGUI>().text = Configs.nomesPersonagens[Configs.personagens[indexPersonagem]];
     }
 
+    public static void LoadInicial() {    /*Esta função é responsável por ler os dados do arquivo no início do jogo*/
+        Debug.Log("Lendo os dados do arquivo!");
+        ConfigsData dataLoad = Configs.LoadData();
+        if (dataLoad != null) {
+            Configs.dificuldade = dataLoad.dificuldade;
+            Configs.numMoedas = dataLoad.numMoedas;
+            Configs.highScoreFacil = dataLoad.highScoreFacil;
+            Configs.highScorePadrao = dataLoad.highScorePadrao;
+            Configs.highScoreHardcore = dataLoad.highScoreHardcore;
+            Configs.indexPersonagemSelecionado = dataLoad.indexPersonagemSelecionado;
+            Configs.isCompradoPersonagens = dataLoad.isCompradoPersonagens;
+        }
+        else {
+            Debug.Log("Arquivo não encontrado!");
+        }
+    }
+
     private void tocarSomBotão() {
         /*Aqui será o som do botão*/
-        Debug.Log("som");
     }
 }
