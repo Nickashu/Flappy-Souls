@@ -71,7 +71,12 @@ public class Main_Character : MonoBehaviour{
     private void OnTriggerEnter2D(Collider2D colisor) {
         if (colisor.tag == "moeda") {      /*Verificando se o jogador pegou uma moeda extra*/
             Debug.Log("Pegou moeda!");
-            moedas ++;
+            if (Configs.dificuldade == 0)
+                moedas++;
+            else if (Configs.dificuldade == 1)
+                moedas += 2;
+            else
+                moedas += 3;
             Destroy(colisor.gameObject);
         }
     }

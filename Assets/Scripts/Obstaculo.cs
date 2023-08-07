@@ -1,9 +1,8 @@
-using System.Collections;
 using UnityEngine;
 
 public class Obstaculo : MonoBehaviour{
 
-    public float velocidade;
+    private float velocidade=2;
 
     void Update(){
         if (!Main_Character.morreu) {    /*Se o personagem não tiver morrido*/

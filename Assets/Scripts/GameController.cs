@@ -5,11 +5,13 @@ using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour {
 
-    public GameObject cam, obstaculo, moeda, objetoPersonagens, txtNumMoedasMenu, txtNomePersonagem;
+    public GameObject cam, objObstaculos, moeda, objetoPersonagens, txtNumMoedasMenu, txtNomePersonagem;
+    private GameObject obstaculo;
+    public TMP_Dropdown dropDownDificuldade;
     public Transform ground, background;
     public static float distanciaSpawn, distanciaDestroy;
 
-    private float limiteSuperiorObstaculo = 2.08f, limiteInferiorObstaculo = -4.2f, limiteSuperiorMoeda=6, limiteInferiorMoeda=-4, tempoTransicaoTelas=0.2f, posicaoInicialCamera, intervaloReposicaoCenario=20.04f;
+    private float limiteSuperiorObstaculo = 2.08f, limiteInferiorObstaculo = -4.2f, limiteSuperiorMoeda=6.2f, limiteInferiorMoeda=-4.2f, tempoTransicaoTelas=0.2f, posicaoInicialCamera, intervaloReposicaoCenario=20.04f, tempoSpawnObstaculos=4;
     private float posicaoTrocaPersonagemDireita = -6.6f, posicaoTrocaPersonagemEsquerda = 5.5f, posicaoCentral=-1.4f;
     private int cont = 0, contObstaculos=0;
     private int indexPersonagemAtivo = 0, indexNovoPersonagem = 0, numPersonagens=0;
@@ -26,6 +28,22 @@ public class GameController : MonoBehaviour {
                     Cam.player = objetoPersonagens.transform.GetChild(i).gameObject.transform;
                     break;
                 }
+            }
+            /*Definindo as configurações de acordo com a dificuldade*/
+            if (Configs.dificuldade == 0) {
+                limiteInferiorObstaculo = -4;
+                limiteSuperiorObstaculo = 1.7f;
+                obstaculo = objObstaculos.transform.GetChild(0).gameObject;
+            }
+            else if (Configs.dificuldade == 1) {
+                limiteInferiorObstaculo = -4.74f;
+                limiteSuperiorObstaculo = 1.6f;
+                obstaculo = objObstaculos.transform.GetChild(1).gameObject;
+            }
+            else {
+                limiteInferiorObstaculo = -5.6f;
+                limiteSuperiorObstaculo = 1.7f;
+                obstaculo = objObstaculos.transform.GetChild(2).gameObject;
             }
 
             atualizarNumMoedas();
@@ -51,6 +69,8 @@ public class GameController : MonoBehaviour {
             atualizarNumMoedas();
         }
         if (SceneManager.GetActiveScene().name.Contains("settings")) {
+            dropDownDificuldade.SetValueWithoutNotify(Configs.dificuldade);
+
             for (int i = 0; i < numPersonagens; i++) {
                 if (i == Configs.indexPersonagemSelecionado) {
                     objetoPersonagens.transform.GetChild(i).gameObject.SetActive(true);
@@ -117,7 +137,7 @@ public class GameController : MonoBehaviour {
 
     private IEnumerator spawnarObstaculo() {
         if(cont > 1)     /*Verificando se é a primeira vez que estou chamando*/
-            yield return new WaitForSeconds(4);
+            yield return new WaitForSeconds(tempoSpawnObstaculos);
         GameObject objetoCopia = Instantiate(obstaculo);
         Vector3 posicao = new Vector3(distanciaSpawn, Random.Range(limiteInferiorObstaculo, limiteSuperiorObstaculo), obstaculo.transform.position.z);
         objetoCopia.transform.position = posicao;
@@ -133,43 +153,8 @@ public class GameController : MonoBehaviour {
         StopAllCoroutines();    //Para impedir que sejam spawnados vários objetos
     }
 
-    public void quitGame() {
-        Application.Quit();    /*Saindo do jogo*/
-    }
 
-    public void telaConfiguracoes() {
-        tocarSomBotão();
-        StartCoroutine(carregarTelaConfiguracoes());
-    }
-    public IEnumerator carregarTelaConfiguracoes() {
-        yield return new WaitForSeconds(tempoTransicaoTelas);
-        Transicao_Fases.tela = 3;
-        Transicao_Fases.transicao = true;
-    }
-
-    public void telaPersonagens() {
-        tocarSomBotão();
-        Debug.Log("apertou!");
-        StartCoroutine(carregarTelaPersonagens());
-    }
-    public IEnumerator carregarTelaPersonagens() {
-        yield return new WaitForSeconds(tempoTransicaoTelas);
-        Transicao_Fases.tela = 2;
-        Transicao_Fases.transicao = true;
-    }
-
-    public void telaMenu() {
-        if (!isTrocandoPersonagensDireita && !isTrocandoPersonagensEsquerda && !isComprandoPersonagem) {
-            tocarSomBotão();
-            StartCoroutine(carregarTelaMenu());
-        }
-    }
-    public IEnumerator carregarTelaMenu() {
-        yield return new WaitForSeconds(tempoTransicaoTelas);
-        Transicao_Fases.tela = 1;
-        Transicao_Fases.transicao = true;
-    }
-
+    /*Funções de botões*/
     public void trocarPersonagemDireita() {    /*Esta função será chamada na tela de troca de personagens*/
         if (!isTrocandoPersonagensDireita && !isTrocandoPersonagensEsquerda) {
             for (int i = 0; i < numPersonagens; i++) {
@@ -252,6 +237,51 @@ public class GameController : MonoBehaviour {
         StopAllCoroutines();
     }
 
+    public void quitGame() {
+        Application.Quit();    /*Saindo do jogo*/
+    }
+
+    public void telaConfiguracoes() {
+        tocarSomBotão();
+        StartCoroutine(carregarTelaConfiguracoes());
+    }
+    public IEnumerator carregarTelaConfiguracoes() {
+        yield return new WaitForSeconds(tempoTransicaoTelas);
+        Transicao_Fases.tela = 3;
+        Transicao_Fases.transicao = true;
+    }
+
+    public void telaPersonagens() {
+        tocarSomBotão();
+        Debug.Log("apertou!");
+        StartCoroutine(carregarTelaPersonagens());
+    }
+    public IEnumerator carregarTelaPersonagens() {
+        yield return new WaitForSeconds(tempoTransicaoTelas);
+        Transicao_Fases.tela = 2;
+        Transicao_Fases.transicao = true;
+    }
+
+    public void telaMenu() {
+        if (!isTrocandoPersonagensDireita && !isTrocandoPersonagensEsquerda && !isComprandoPersonagem) {
+            tocarSomBotão();
+            StartCoroutine(carregarTelaMenu());
+        }
+    }
+    public IEnumerator carregarTelaMenu() {
+        yield return new WaitForSeconds(tempoTransicaoTelas);
+        Transicao_Fases.tela = 1;
+        Transicao_Fases.transicao = true;
+    }
+
+    public void trocarDificuldade(int valor) {
+        Configs.dificuldade = valor;    /*Alterando a dificuldade do jogo*/
+    }
+
+
+
+
+    /*Funções auxiliares*/
     private void atualizarNumMoedas() {
         txtNumMoedasMenu.GetComponent<TextMeshProUGUI>().text = Configs.numMoedas.ToString();
     }
