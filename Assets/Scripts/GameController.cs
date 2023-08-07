@@ -36,12 +36,12 @@ public class GameController : MonoBehaviour {
                 obstaculo = objObstaculos.transform.GetChild(0).gameObject;
             }
             else if (Configs.dificuldade == 1) {
-                limiteInferiorObstaculo = -4.74f;
+                limiteInferiorObstaculo = -4.5f;
                 limiteSuperiorObstaculo = 1.6f;
                 obstaculo = objObstaculos.transform.GetChild(1).gameObject;
             }
             else {
-                limiteInferiorObstaculo = -5.6f;
+                limiteInferiorObstaculo = -5.5f;
                 limiteSuperiorObstaculo = 1.7f;
                 obstaculo = objObstaculos.transform.GetChild(2).gameObject;
             }

@@ -12,6 +12,11 @@ TagManager:
   - numMoedas
   - score
   - moeda
+  - pinkGuy
+  - frog
+  - virtualGuy
+  - maskDude
+  - highScore
   layers:
   - Default
   - TransparentFX
