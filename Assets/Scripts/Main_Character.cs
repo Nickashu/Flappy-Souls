@@ -68,15 +68,15 @@ public class Main_Character : MonoBehaviour{
                 txtScore.SetActive(true);
                 txtScore.gameObject.GetComponent<TextMeshProUGUI>().text = score.ToString();   /*Atualizando o score*/
                 if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.Mouse0)) {
-                    rig.gravityScale = 0;
-                    rig.AddForce(new Vector2(0, forcaPulo), ForceMode2D.Impulse);    /*Adicionando fora ao rigidbody para fazer o personagem pular*/
                     anim.SetBool("isPulando", true);
                     anim.SetBool("isCaindo", false);
+                    rig.gravityScale = 0;
+                    rig.AddForce(new Vector2(0, forcaPulo), ForceMode2D.Impulse);    /*Adicionando fora ao rigidbody para fazer o personagem pular*/
                 }
                 if ((Input.GetKeyUp(KeyCode.Mouse0) && !Input.GetKey(KeyCode.Space)) || (Input.GetKeyUp(KeyCode.Space) && !Input.GetKey(KeyCode.Mouse0))) {
-                    rig.gravityScale = gravidade;
                     anim.SetBool("isPulando", false);
                     anim.SetBool("isCaindo", true);
+                    rig.gravityScale = gravidade;
                 }
 
                 transform.Translate(Vector3.right * velocidade * Time.deltaTime);   /*Para mover o personagem para a direita*/
