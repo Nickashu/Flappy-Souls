@@ -2558,13 +2558,25 @@ MonoBehaviour:
   m_FillRect: {fileID: 1737473519}
   m_HandleRect: {fileID: 826187900}
   m_Direction: 0
-  m_MinValue: -80
-  m_MaxValue: 20
+  m_MinValue: 0
+  m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 20
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1832466865}
+        m_TargetAssemblyTypeName: GameController, Assembly-CSharp
+        m_MethodName: sliderVolume
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1143908259
 GameObject:
   m_ObjectHideFlags: 0
@@ -2946,6 +2958,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: gameController
       objectReference: {fileID: 0}
+    - target: {fileID: 7124809865446771677, guid: 90120e1ebec89a44b8b0ce74a0a487ca, type: 3}
+      propertyPath: sliderSom
+      value: 
+      objectReference: {fileID: 1114460910}
     - target: {fileID: 7124809865446771677, guid: 90120e1ebec89a44b8b0ce74a0a487ca, type: 3}
       propertyPath: objetoPersonagens
       value: 

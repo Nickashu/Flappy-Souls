@@ -2,16 +2,18 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 
     public GameObject cam, objObstaculos, moeda, objetoPersonagens, txtNumMoedasMenu, txtNomePersonagem;
     private GameObject obstaculo;
     public TMP_Dropdown dropDownDificuldade;
+    public Slider sliderSom;
     public Transform ground, background;
     public static float distanciaSpawn, distanciaDestroy;
 
-    private float limiteSuperiorObstaculo = 2.08f, limiteInferiorObstaculo = -4.2f, limiteSuperiorMoeda=6.2f, limiteInferiorMoeda=-4.2f, tempoTransicaoTelas=0.2f, posicaoInicialCamera, intervaloReposicaoCenario=20.04f, tempoSpawnObstaculos=4;
+    private float limiteSuperiorObstaculo = 2.08f, limiteInferiorObstaculo = -4.2f, limiteSuperiorMoeda=6.2f, limiteInferiorMoeda=-4.2f, tempoTransicaoTelas=0.2f, posicaoInicialCamera, intervaloReposicaoCenario=20.04f, tempoSpawnObstaculos=5;
     private float posicaoTrocaPersonagemDireita = -6.6f, posicaoTrocaPersonagemEsquerda = 5.5f, posicaoCentral=-1.4f;
     private int cont = 0, contObstaculos=0;
     private int indexPersonagemAtivo = 0, indexNovoPersonagem = 0, numPersonagens=0;
@@ -35,18 +37,18 @@ public class GameController : MonoBehaviour {
             }
             /*Definindo as configurações de acordo com a dificuldade*/
             if (Configs.dificuldade == 0) {
-                limiteInferiorObstaculo = -4;
-                limiteSuperiorObstaculo = 1.7f;
+                limiteInferiorObstaculo = 3.4f;
+                limiteSuperiorObstaculo = 10.5f;
                 obstaculo = objObstaculos.transform.GetChild(0).gameObject;
             }
             else if (Configs.dificuldade == 1) {
                 limiteInferiorObstaculo = -4.5f;
-                limiteSuperiorObstaculo = 1.6f;
+                limiteSuperiorObstaculo = 3.4f;
                 obstaculo = objObstaculos.transform.GetChild(1).gameObject;
             }
             else {
-                limiteInferiorObstaculo = -5.5f;
-                limiteSuperiorObstaculo = 1.7f;
+                limiteInferiorObstaculo = -6.2f;
+                limiteSuperiorObstaculo = 2.3f;
                 obstaculo = objObstaculos.transform.GetChild(2).gameObject;
             }
 
@@ -65,15 +67,15 @@ public class GameController : MonoBehaviour {
                     objetoPersonagens.transform.GetChild(i).gameObject.GetComponent<SpriteRenderer>().color = Color.black;
                     objetoPersonagens.transform.GetChild(i).transform.GetChild(0).transform.GetChild(0).transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = Configs.precosPersonagens[Configs.personagens[i]].ToString();      /*Recuperando o preço do personagem*/
                 }
-                else {     /*Se o personagem foi comprado, vou remover o preço dele*/
+                else     /*Se o personagem foi comprado, vou remover o preço dele*/
                     objetoPersonagens.transform.GetChild(i).gameObject.transform.GetChild(0).gameObject.SetActive(false);
-                }
             }
 
             atualizarNumMoedas();
         }
         if (SceneManager.GetActiveScene().name.Contains("settings")) {
             dropDownDificuldade.SetValueWithoutNotify(Configs.dificuldade);
+            sliderSom.SetValueWithoutNotify(Configs.volume);
 
             for (int i = 0; i < numPersonagens; i++) {
                 if (i == Configs.indexPersonagemSelecionado) {
@@ -87,7 +89,7 @@ public class GameController : MonoBehaviour {
     void Update() {
         if (SceneManager.GetActiveScene().name.Contains("main")) {    /*Se estiver na cena do jogo*/
             distanciaDestroy = cam.GetComponent<Transform>().position.x - 17;
-            distanciaSpawn = cam.GetComponent<Transform>().position.x + 13;
+            distanciaSpawn = cam.GetComponent<Transform>().position.x + 14;
             if (!Main_Character.morreu && Main_Character.comecouJogo) {
                 if (cont <= 2)
                     cont++;
@@ -117,7 +119,6 @@ public class GameController : MonoBehaviour {
                         atualizarNomePersonagem(indexNovoPersonagem);   /*Atualizando o nome do personagem*/
                         if (Configs.isCompradoPersonagens[Configs.personagens[indexNovoPersonagem]] == true) {     /*Verificando se o personagem foi comprado*/
                             Configs.indexPersonagemSelecionado = indexNovoPersonagem;     /*Definindo o novo personagem no arquivo de configurações globais*/
-                            Debug.Log("Salvando os dados no arquivo!");
                             Configs.SaveData();
                         }
                     }
@@ -134,7 +135,6 @@ public class GameController : MonoBehaviour {
                         atualizarNomePersonagem(indexNovoPersonagem);   /*Atualizando o nome do personagem*/
                         if (Configs.isCompradoPersonagens[Configs.personagens[indexNovoPersonagem]] == true) {     /*Verificando se o personagem foi comprado*/
                             Configs.indexPersonagemSelecionado = indexNovoPersonagem;     /*Definindo o novo personagem no arquivo de configurações globais*/
-                            Debug.Log("Salvando os dados no arquivo!");
                             Configs.SaveData();
                         }
                     }
@@ -153,7 +153,7 @@ public class GameController : MonoBehaviour {
         contObstaculos++;
         if(contObstaculos == 2) {     /*A cada 3 obstáculos, será spawnada uma moeda*/
             GameObject moedaCopia = Instantiate(moeda);
-            Vector3 posicaoMoeda = new Vector3(objetoCopia.transform.position.x + 10, Random.Range(limiteInferiorMoeda, limiteSuperiorMoeda), moeda.transform.position.z);
+            Vector3 posicaoMoeda = new Vector3(objetoCopia.transform.position.x + 8, Random.Range(limiteInferiorMoeda, limiteSuperiorMoeda), moeda.transform.position.z);
             moedaCopia.transform.position = posicaoMoeda;
             moedaCopia.SetActive(true);
             contObstaculos = 0;
@@ -223,21 +223,18 @@ public class GameController : MonoBehaviour {
         if(Configs.numMoedas >= Configs.precosPersonagens[Configs.personagens[indexPersonagemComprado]]) {      /*Se o dinheiro for suficiente*/
             tocarSomBotão();    /*Aqui será tocado o som do botão de compra bem sucedida*/
             objetoPersonagens.transform.GetChild(indexPersonagemComprado).transform.GetChild(0).gameObject.SetActive(false);    /*Escondendo o preço*/
-            Debug.Log("Compra efetuada!");
 
             /*Definindo o novo personagem no arquivo de configurações globais*/
             Configs.numMoedas -= Configs.precosPersonagens[Configs.personagens[indexPersonagemComprado]];
             Configs.isCompradoPersonagens[Configs.personagens[indexPersonagemComprado]] = true;
             Configs.indexPersonagemSelecionado = indexPersonagemComprado;
             atualizarNumMoedas();
-            Debug.Log("Salvando os dados no arquivo!");
             Configs.SaveData();
 
             isComprandoPersonagem = true;
             StartCoroutine(comprarPersonagem(indexPersonagemComprado));
         }
         else {      /*Se o dinheiro for insuficiente*/
-            Debug.Log("Dinheiro insuficiente!");
             tocarSomBotão();    /*Aqui será tocado o som do botão de compra mal sucedida*/
         }
     }
@@ -287,7 +284,17 @@ public class GameController : MonoBehaviour {
 
     public void trocarDificuldade(int valor) {
         Configs.dificuldade = valor;    /*Alterando a dificuldade do jogo*/
-        Debug.Log("Salvando os dados no arquivo!");
+        Configs.SaveData();
+    }
+
+    public void sliderVolume(float volume) {
+        StopAllCoroutines();
+        AudioListener.volume = volume;   /*Mudando o volume do jogo*/
+        StartCoroutine(salvarVolume(volume));
+    }
+    private IEnumerator salvarVolume(float valor) {    /*Salvando o volume novo*/
+        yield return new WaitForSeconds(0.5f);
+        Configs.volume = valor;
         Configs.SaveData();
     }
 
@@ -314,10 +321,11 @@ public class GameController : MonoBehaviour {
             Configs.highScoreHardcore = dataLoad.highScoreHardcore;
             Configs.indexPersonagemSelecionado = dataLoad.indexPersonagemSelecionado;
             Configs.isCompradoPersonagens = dataLoad.isCompradoPersonagens;
+            Configs.volume = dataLoad.volume;
+            AudioListener.volume = dataLoad.volume;
         }
-        else {
+        else
             Debug.Log("Arquivo não encontrado!");
-        }
     }
 
     private void tocarSomBotão() {

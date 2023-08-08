@@ -9,6 +9,7 @@ public class Configs : MonoBehaviour {
 
     /*O que precisará ser salvo*/
     public static int dificuldade=1, indexPersonagemSelecionado=1, numMoedas=0, highScoreFacil=0, highScorePadrao = 0, highScoreHardcore = 0;
+    public static float volume = 1;
     public static Dictionary<string, bool> isCompradoPersonagens = new Dictionary<string, bool>() {
         {"frog", false}, {"pinkGuy", true}, {"virtualGuy", false}, {"maskDude", false}
     };
@@ -21,7 +22,7 @@ public class Configs : MonoBehaviour {
         {"frog", "Renan"}, {"pinkGuy", "Fabrício"}, {"virtualGuy", "Heitor"}, {"maskDude", "Douglas"}
     };
     public static Dictionary<string, int> precosPersonagens = new Dictionary<string, int>() {
-        {"frog", 50}, {"pinkGuy", 50}, {"virtualGuy", 20}, {"maskDude", 20}
+        {"frog", 500}, {"pinkGuy", 50}, {"virtualGuy", 200}, {"maskDude", 100}
     };
 
     private void Awake() {
@@ -30,7 +31,7 @@ public class Configs : MonoBehaviour {
 
     public static void SaveData() {
         string path = Application.persistentDataPath + "/configs.bin";
-        ConfigsData data = new ConfigsData(dificuldade, indexPersonagemSelecionado, numMoedas, highScoreFacil, highScorePadrao, highScoreHardcore, isCompradoPersonagens);
+        ConfigsData data = new ConfigsData(dificuldade, indexPersonagemSelecionado, numMoedas, highScoreFacil, highScorePadrao, highScoreHardcore, isCompradoPersonagens, volume);
         BinaryFormatter formatter = new BinaryFormatter();
         FileStream fileStream = new FileStream(path, FileMode.Create);    /*Se o arquivo não existir, será criado. Caso contrário, sera sobrescrito*/
 
@@ -74,11 +75,12 @@ public class Configs : MonoBehaviour {
 [System.Serializable]
 public class ConfigsData {
     public int dificuldade = 1, indexPersonagemSelecionado = 1, numMoedas = 0, highScoreFacil = 0, highScorePadrao = 0, highScoreHardcore = 0;
+    public float volume;
     public Dictionary<string, bool> isCompradoPersonagens = new Dictionary<string, bool>() {
         {"frog", false}, {"pinkGuy", true}, {"virtualGuy", false}, {"maskDude", false}
     };
 
-    public ConfigsData(int dificuldade, int indexPersonagemSelecionado, int numMoedas, int highScoreFacil, int highScorePadrao, int highScoreHardcore, Dictionary<string, bool> isCompradoPersonagens) {
+    public ConfigsData(int dificuldade, int indexPersonagemSelecionado, int numMoedas, int highScoreFacil, int highScorePadrao, int highScoreHardcore, Dictionary<string, bool> isCompradoPersonagens, float volume) {
         this.dificuldade = dificuldade;
         this.indexPersonagemSelecionado = indexPersonagemSelecionado;
         this.numMoedas = numMoedas;
@@ -86,5 +88,6 @@ public class ConfigsData {
         this.highScorePadrao = highScorePadrao;
         this.highScoreHardcore = highScoreHardcore;
         this.isCompradoPersonagens = isCompradoPersonagens;
+        this.volume = volume;
     }
 }

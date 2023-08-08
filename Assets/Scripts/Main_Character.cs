@@ -56,7 +56,6 @@ public class Main_Character : MonoBehaviour{
                     Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
                     Vector2 worldPosition2D = new Vector2(worldPosition.x, worldPosition.y);
                     if (!objetoBotoes.GetComponent<Collider2D>().OverlapPoint(worldPosition2D)) {    /*Verifica se o clique ocorreu sobre o objeto que bloqueia o clique nos botões*/
-                        Debug.Log("Não clicou no objeto!");
                         canvas.SetActive(false);
                         comecouJogo = true;
                         contToques++;
@@ -126,7 +125,6 @@ public class Main_Character : MonoBehaviour{
                 comecouJogo = false;
                 morreu = true;
 
-                Debug.Log("Salvando os dados no arquivo!");
                 Configs.SaveData();
             }
         }
@@ -135,23 +133,22 @@ public class Main_Character : MonoBehaviour{
     private IEnumerator aparecerMenuMorte() {
         Transform[] filhosMenuMorte = menuMorte.GetComponentsInChildren<Transform>(true);
         for (int i = 0; i < filhosMenuMorte.Length; i++) {
-            if (filhosMenuMorte[i].gameObject.tag == "score") {
+            if (filhosMenuMorte[i].gameObject.tag == "score")
                 filhosMenuMorte[i].gameObject.GetComponent<TextMeshProUGUI>().text = score.ToString();
-            }
-            if (filhosMenuMorte[i].gameObject.tag == "numMoedas") {
+
+            if (filhosMenuMorte[i].gameObject.tag == "numMoedas")
                 filhosMenuMorte[i].gameObject.GetComponent<TextMeshProUGUI>().text = "+" + moedas.ToString();
-            }
+
             if (filhosMenuMorte[i].gameObject.tag == "txtNovoRecorde") {
                 if (ultrapassouRecorde)
                     filhosMenuMorte[i].gameObject.SetActive(true);
             }
+
             if (filhosMenuMorte[i].gameObject.tag == "highScore") {
-                if (ultrapassouRecorde) {
+                if (ultrapassouRecorde)
                     filhosMenuMorte[i].gameObject.GetComponent<TextMeshProUGUI>().text = " " + score.ToString() + "(Modo " + Configs.dificuldades[Configs.dificuldade] + ")";
-                }
-                else {
+                else
                     filhosMenuMorte[i].gameObject.GetComponent<TextMeshProUGUI>().text = " " + highScore + "(Modo " + Configs.dificuldades[Configs.dificuldade] + ")";
-                }
             }
         }
         yield return new WaitForSeconds(1.5f);
