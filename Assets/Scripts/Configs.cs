@@ -19,10 +19,10 @@ public class Configs : MonoBehaviour {
     public static string[] dificuldades = { "Fácil", "Padrão", "Hardcore" };
 
     public static Dictionary<string, string> nomesPersonagens = new Dictionary<string, string>() {
-        {"frog", "Renan"}, {"pinkGuy", "Fabrício"}, {"virtualGuy", "Heitor"}, {"maskDude", "Douglas"}
+        {"frog", "Renan"}, {"pinkGuy", "Robson"}, {"virtualGuy", "Gabriel Pec"}, {"maskDude", "Douglas"}
     };
     public static Dictionary<string, int> precosPersonagens = new Dictionary<string, int>() {
-        {"frog", 10}, {"pinkGuy", 500}, {"virtualGuy", 200}, {"maskDude", 100}
+        {"frog", 500}, {"pinkGuy", 50}, {"virtualGuy", 200}, {"maskDude", 100}
     };
 
     private void Awake() {
