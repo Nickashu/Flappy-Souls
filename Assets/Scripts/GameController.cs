@@ -19,8 +19,13 @@ public class GameController : MonoBehaviour {
     private int indexPersonagemAtivo = 0, indexNovoPersonagem = 0, numPersonagens=0;
     private bool isTrocandoPersonagensDireita = false, isTrocandoPersonagensEsquerda = false, isComprandoPersonagem = false;
 
+    public AudioSource somCompraFracasso, somCompraBemSucedida, somBotoes;
+
+    private static AudioController instanciaAudioController;
+
     private void Start() {
         numPersonagens = objetoPersonagens.transform.childCount;
+        instanciaAudioController = AudioController.instancia;
 
         if (SceneManager.GetActiveScene().name.Contains("main")) {       /*Se estiver na cena do jogo*/
             if(Configs.primeiraTela == true) {    /*Se for o load inicial do jogo*/
@@ -220,8 +225,8 @@ public class GameController : MonoBehaviour {
                 break;
             }
         }
-        if(Configs.numMoedas >= Configs.precosPersonagens[Configs.personagens[indexPersonagemComprado]]) {      /*Se o dinheiro for suficiente*/
-            tocarSomBotão();    /*Aqui será tocado o som do botão de compra bem sucedida*/
+        if (Configs.numMoedas >= Configs.precosPersonagens[Configs.personagens[indexPersonagemComprado]]) {      /*Se o dinheiro for suficiente*/
+            tocarSom(somCompraBemSucedida);
             objetoPersonagens.transform.GetChild(indexPersonagemComprado).transform.GetChild(0).gameObject.SetActive(false);    /*Escondendo o preço*/
 
             /*Definindo o novo personagem no arquivo de configurações globais*/
@@ -235,7 +240,7 @@ public class GameController : MonoBehaviour {
             StartCoroutine(comprarPersonagem(indexPersonagemComprado));
         }
         else {      /*Se o dinheiro for insuficiente*/
-            tocarSomBotão();    /*Aqui será tocado o som do botão de compra mal sucedida*/
+            tocarSom(somCompraFracasso);
         }
     }
 
@@ -251,8 +256,10 @@ public class GameController : MonoBehaviour {
     }
 
     public void telaConfiguracoes() {
-        tocarSomBotão();
+        tocarSom(somBotoes);
         StartCoroutine(carregarTelaConfiguracoes());
+        instanciaAudioController.pararMusica(AudioController.INDEX_MUSICA_AMBIENTE);
+        instanciaAudioController.tocarMusica(AudioController.INDEX_MUSICA_MENU);
     }
     public IEnumerator carregarTelaConfiguracoes() {
         yield return new WaitForSeconds(tempoTransicaoTelas);
@@ -261,8 +268,10 @@ public class GameController : MonoBehaviour {
     }
 
     public void telaPersonagens() {
-        tocarSomBotão();
+        tocarSom(somBotoes);
         StartCoroutine(carregarTelaPersonagens());
+        instanciaAudioController.pararMusica(AudioController.INDEX_MUSICA_AMBIENTE);
+        instanciaAudioController.tocarMusica(AudioController.INDEX_MUSICA_MENU);
     }
     public IEnumerator carregarTelaPersonagens() {
         yield return new WaitForSeconds(tempoTransicaoTelas);
@@ -272,8 +281,15 @@ public class GameController : MonoBehaviour {
 
     public void telaMenu() {
         if (!isTrocandoPersonagensDireita && !isTrocandoPersonagensEsquerda && !isComprandoPersonagem) {
-            tocarSomBotão();
+            tocarSom(somBotoes);
             StartCoroutine(carregarTelaMenu());
+            if (SceneManager.GetActiveScene().name == "main") {     /*Se estiver na tela de morte e voltando para o menu, a música ambiente precisa voltar*/
+                instanciaAudioController.tocarMusica(AudioController.INDEX_MUSICA_AMBIENTE);
+            }
+            else {
+                instanciaAudioController.pararMusica(AudioController.INDEX_MUSICA_MENU);
+                instanciaAudioController.tocarMusica(AudioController.INDEX_MUSICA_AMBIENTE);
+            }
         }
     }
     public IEnumerator carregarTelaMenu() {
@@ -328,7 +344,8 @@ public class GameController : MonoBehaviour {
             Debug.Log("Arquivo não encontrado!");
     }
 
-    private void tocarSomBotão() {
+    public static void tocarSom(AudioSource audio) {
         /*Aqui será o som do botão*/
+        audio.Play();
     }
 }

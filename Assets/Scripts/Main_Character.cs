@@ -13,7 +13,12 @@ public class Main_Character : MonoBehaviour{
     public float forcaPulo, gravidade, velocidade;
     public static bool morreu = false, comecouJogo=false;
 
+    public AudioController instanciaAudioController;
+    public AudioSource somMorte, somImpulso, somMoeda, somPonto;
+
     void Awake(){
+        instanciaAudioController = AudioController.instancia;
+
         anim = GetComponent<Animator>();
         rig = GetComponent<Rigidbody2D>();
         txtScore.gameObject.SetActive(false);    /*Escondendo o score*/
@@ -41,10 +46,15 @@ public class Main_Character : MonoBehaviour{
             if (!comecouJogo) {
                 if (Input.GetKeyDown(KeyCode.Alpha9))
                     Configs.ResetData();   /*Apagando todos os dados salvos*/
+                if (Input.GetKeyDown(KeyCode.Alpha7))
+                    GameController.tocarSom(somImpulso);
             }
 
             if(Input.GetKeyDown(KeyCode.Space)) {     /*Primeiro pulo com espaço*/
                 if (contToques == 0) {    /*No começo do jogo (primeira vez que a pessoa der o input)*/
+                    GameController.tocarSom(somImpulso);
+                    instanciaAudioController.pararMusica(AudioController.INDEX_MUSICA_AMBIENTE);
+                    instanciaAudioController.tocarMusica(AudioController.INDEX_MUSICA_JOGO);
                     canvas.SetActive(false);
                     comecouJogo = true;
                     contToques++;
@@ -56,6 +66,9 @@ public class Main_Character : MonoBehaviour{
                     Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
                     Vector2 worldPosition2D = new Vector2(worldPosition.x, worldPosition.y);
                     if (!objetoBotoes.GetComponent<Collider2D>().OverlapPoint(worldPosition2D)) {    /*Verifica se o clique ocorreu sobre o objeto que bloqueia o clique nos botões*/
+                        GameController.tocarSom(somImpulso);
+                        instanciaAudioController.pararMusica(AudioController.INDEX_MUSICA_AMBIENTE);
+                        instanciaAudioController.tocarMusica(AudioController.INDEX_MUSICA_JOGO);
                         canvas.SetActive(false);
                         comecouJogo = true;
                         contToques++;
@@ -87,6 +100,7 @@ public class Main_Character : MonoBehaviour{
         if(colisor.tag == "obstaculo" && !morreu) {     /*Verificando se o personagem conseguiu passar por um obstáculo*/
             score++;
             moedas++;
+            GameController.tocarSom(somPonto);
             gameObject.transform.GetChild(0).gameObject.SetActive(true);     /*Ativando o canvas do personagem e fazendo aparecer o indicador de pontuação*/
             StartCoroutine(desativarCanvasPersonagem());
         }
@@ -100,6 +114,7 @@ public class Main_Character : MonoBehaviour{
     private void OnTriggerEnter2D(Collider2D colisor) {
         if (colisor.tag == "moeda") {      /*Verificando se o jogador pegou uma moeda extra*/
             moedas += pontosMoeda;
+            GameController.tocarSom(somMoeda);
             Destroy(colisor.gameObject);
         }
     }
@@ -108,6 +123,9 @@ public class Main_Character : MonoBehaviour{
         if((colisor.gameObject.tag == "cano" || colisor.gameObject.tag == "ground") && !morreu) {     /*Verificando a morte do personagem*/
             if(contToques > 0) {
                 gameObject.GetComponent<Rigidbody2D>().gravityScale = 5;
+                GameController.tocarSom(somMorte);
+                instanciaAudioController.pararMusica(AudioController.INDEX_MUSICA_JOGO);
+
                 if (score > highScore) {
                     ultrapassouRecorde = true;
                     if (Configs.dificuldade == 0)

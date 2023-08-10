@@ -22,7 +22,7 @@ public class Configs : MonoBehaviour {
         {"frog", "Renan"}, {"pinkGuy", "Fabrício"}, {"virtualGuy", "Heitor"}, {"maskDude", "Douglas"}
     };
     public static Dictionary<string, int> precosPersonagens = new Dictionary<string, int>() {
-        {"frog", 500}, {"pinkGuy", 50}, {"virtualGuy", 200}, {"maskDude", 100}
+        {"frog", 10}, {"pinkGuy", 500}, {"virtualGuy", 200}, {"maskDude", 100}
     };
 
     private void Awake() {
